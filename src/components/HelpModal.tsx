@@ -43,6 +43,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             <li>คำที่ทายแต่ละคำต้องเป็นคำศัพท์ภาษาอังกฤษ 5 ตัวอักษรที่มีความหมาย</li>
             <li>กดปุ่ม <strong>ENTER</strong> เพื่อส่งคำตอบ</li>
             <li>หลังจากส่งคำตอบ สีของกล่องตัวอักษรจะเปลี่ยนไปเพื่อบอกใบ้</li>
+            <li>สามารถกดปุ่ม <strong>💡 คำใบ้</strong> เพื่อสุ่มใบ้ตัวอักษรที่ยังไม่เคยเปิดเผยได้ 1 ครั้งต่อเกม</li>
           </ul>
 
           <div className="border-t border-[#2e2e30] pt-3.5">

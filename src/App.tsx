@@ -117,6 +117,9 @@ export default function App() {
   const [gameStatus, setGameStatus] = useState<GameStatus>(() => {
     return initialSavedState.current?.gameStatus || 'IN_PROGRESS';
   });
+  const [isHintUsed, setIsHintUsed] = useState<boolean>(() => {
+    return Boolean(initialSavedState.current?.isHintUsed);
+  });
   const [letterStatuses, setLetterStatuses] = useState<Record<string, TileStatus>>(() => {
     if (initialSavedState.current) {
       return computeKeyboardStatuses(
@@ -164,8 +167,11 @@ export default function App() {
     targetWordInfo,
     isRevealingRow,
     isValidating,
+    isHintUsed,
     isHelpOpen,
     isStatsOpen,
+    evaluations,
+    wonRowIndex,
   });
 
   useEffect(() => {
@@ -176,10 +182,13 @@ export default function App() {
       targetWordInfo,
       isRevealingRow,
       isValidating,
+      isHintUsed,
       isHelpOpen,
       isStatsOpen,
+      evaluations,
+      wonRowIndex,
     };
-  }, [currentGuess, guesses, gameStatus, targetWordInfo, isRevealingRow, isValidating, isHelpOpen, isStatsOpen]);
+  }, [currentGuess, guesses, gameStatus, targetWordInfo, isRevealingRow, isValidating, isHintUsed, isHelpOpen, isStatsOpen, evaluations, wonRowIndex]);
 
   // Show Toast helper
   const showToast = useCallback(
@@ -343,9 +352,73 @@ export default function App() {
         evaluations: newEvaluations,
         gameStatus: nextGameStatus,
         wonRowIndex: nextWonIndex,
+        isHintUsed: stateRef.current.isHintUsed,
       });
     }, totalFlipDuration);
   }, [evaluations, saveGameState, showToast, updateStats]);
+
+  // Use Hint: randomly hint only letters that are not yet revealed in green/correct spot
+  const handleUseHint = useCallback(() => {
+    const {
+      gameStatus: status,
+      isRevealingRow: revealing,
+      isValidating: validating,
+      isHintUsed: used,
+      targetWordInfo: target,
+      evaluations: evals,
+      guesses: currentGuesses,
+      wonRowIndex: currentWonIndex,
+    } = stateRef.current;
+
+    if (status !== 'IN_PROGRESS' || revealing !== null || validating) return;
+    if (used) {
+      showToast('คุณได้ใช้คำใบ้ของรอบนี้ไปแล้ว', 'info', 2000);
+      return;
+    }
+
+    // Find all positions (0..4) that have already been matched with 'correct' (green)
+    const greenIndices = new Set<number>();
+    evals.forEach((rowEvals) => {
+      rowEvals.forEach((tileStatus, idx) => {
+        if (tileStatus === 'correct') {
+          greenIndices.add(idx);
+        }
+      });
+    });
+
+    // Pick only indices that are NOT yet in green position
+    const candidateIndices: number[] = [];
+    for (let i = 0; i < 5; i++) {
+      if (!greenIndices.has(i)) {
+        candidateIndices.push(i);
+      }
+    }
+
+    let hintMessage = '';
+    if (candidateIndices.length > 0) {
+      // Pick a random unrevealed candidate position
+      const randomIndex = candidateIndices[Math.floor(Math.random() * candidateIndices.length)];
+      const hintChar = target.word[randomIndex].toUpperCase();
+      const posLabels = ['ที่ 1', 'ที่ 2', 'ที่ 3', 'ที่ 4', 'ที่ 5'];
+      hintMessage = `💡 คำใบ้: ตำแหน่ง${posLabels[randomIndex]} คือตัวอักษร "${hintChar}" (${target.pos}: ${target.meaningTh})`;
+    } else {
+      // Fallback if all 5 letters are somehow already placed green
+      hintMessage = `💡 คำใบ้: คำนี้มีความหมายว่า "${target.meaningTh}" (${target.pos})`;
+    }
+
+    setIsHintUsed(true);
+    showToast(hintMessage, 'info', 4500);
+
+    // Persist hint usage to localStorage
+    saveGameState({
+      targetWordInfo: target,
+      guesses: currentGuesses,
+      evaluations: evals,
+      gameStatus: status,
+      wonRowIndex: currentWonIndex,
+      isHintUsed: true,
+    });
+  }, [saveGameState, showToast]);
 
   // Add Character
   const handleChar = useCallback((char: string) => {
@@ -413,6 +486,7 @@ export default function App() {
     setEvaluations([]);
     setCurrentGuess('');
     setGameStatus('IN_PROGRESS');
+    setIsHintUsed(false);
     setLetterStatuses({});
     setWonRowIndex(null);
     setIsRevealingRow(null);
@@ -430,6 +504,9 @@ export default function App() {
         onNewGame={handleNewGame}
         onOpenHelp={() => setIsHelpOpen(true)}
         onOpenStats={() => setIsStatsOpen(true)}
+        onUseHint={handleUseHint}
+        isHintUsed={isHintUsed}
+        disabled={gameStatus !== 'IN_PROGRESS' || isRevealingRow !== null || isValidating}
       />
 
       {/* Main Game Center Area */}

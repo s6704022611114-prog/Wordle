@@ -44,4 +44,5 @@ export interface SavedGameState {
   evaluations: TileStatus[][];
   gameStatus: GameStatus;
   wonRowIndex?: number | null;
+  isHintUsed?: boolean;
 }
