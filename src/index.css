@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@layer utilities {
+  @keyframes pop {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1.15);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes flip {
+    0% {
+      transform: rotateX(0);
+    }
+    50% {
+      transform: rotateX(90deg);
+    }
+    100% {
+      transform: rotateX(0);
+    }
+  }
+
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    20%, 60% {
+      transform: translateX(-6px);
+    }
+    40%, 80% {
+      transform: translateX(6px);
+    }
+  }
+
+  @keyframes slideDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .animate-pop {
+    animation: pop 120ms ease-in-out forwards;
+  }
+
+  .animate-flip {
+    animation: flip 500ms ease-in-out forwards;
+  }
+
+  .animate-shake {
+    animation: shake 500ms ease-in-out;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 200ms ease-out forwards;
+  }
+}
+
+/* Ensure touch targets don't zoom on mobile double tap */
+button {
+  touch-action: manipulation;
+}

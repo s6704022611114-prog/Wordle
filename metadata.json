@@ -1,0 +1,6 @@
+{
+  "name": "Wordle English Word Game",
+  "description": "เกมทายคำศัพท์ภาษาอังกฤษ 5 ตัวอักษร (Wordle Clone) พร้อมแป้นพิมพ์เสมือนจริง โหมดมืด และเฉลยความหมายคำศัพท์",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
